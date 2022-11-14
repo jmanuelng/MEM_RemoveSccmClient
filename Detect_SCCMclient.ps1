@@ -15,11 +15,13 @@
 #region Settings
 
 $Error.Clear()
+$Result = 0
+$DetectSummary = ""
 
 #New lines, easier to read Agentexecutor Log file.
 Write-Host "`n`n"
 
-#endregion
+#endregion Settings
 
 #region Functions
 Function Test-IfServiceExistExit1 {
@@ -35,8 +37,12 @@ Function Test-IfServiceExistExit1 {
         Write-Host "Service $ServiceName was not found."
     }
     else {
+
+        $Result = 1
         Write-Warning "Service $ServiceName exists."
-        Exit 1
+        if ( -not ($DetectSummary -eq "")) { $DetectSummary += ", "}
+        $DetectSummary += "$ServiceName exists"
+        
     }
 }
 
@@ -56,12 +62,15 @@ Function Test-IfRegKeyExistExit1 {
     }
     else {
 
+        $Result = 1
         Write-Warning "$RegKeyPath exists."
-        Exit 1
+        if ( -not ($DetectSummary -eq "")) { $DetectSummary += ", "}
+        $DetectSummary += "$RegKeyPath exists"
+
     }
 }
 
-#endregion
+#endregion Functions
 
 
 #region Main
@@ -107,5 +116,15 @@ foreach ($RegService in $RegServices) {
 #New lines, easier to read Agentexecutor Log file.
 Write-Host "`n`n"
 
-Exit 0
-#endregion
+#Return result
+if ($Result -eq 0) {
+
+    Write-Host "OK $([datetime]::Now) : SCCM not found."
+    Exit 0
+}
+else {
+    Write-Host "WARNING $([datetime]::Now) : $DetectSummary"
+    Exit 1
+}
+
+#endregion Main
