@@ -254,7 +254,8 @@ Stop-WinService CmRcService
 if (Test-Path $CCMpath) {
 
     Write-Host "Found $CCMpath, Uninstalling SCCM agent. `n"
-    Start-Process -FilePath $CCMpath -ArgumentList "/uninstall" -Wait -NoNewWindow
+    #Start Uninstall, Included -WorkingDirectory to Start-Process cmdlet as Workaround to error when working directory has characters "[" "]"
+    Start-Process -WorkingDirectory $Env:WinDir -FilePath $CCMpath -ArgumentList "/uninstall" -Wait -NoNewWindow
     
     # wait for exit
     $CCMProcess = Get-Process ccmsetup -ErrorAction SilentlyContinue
