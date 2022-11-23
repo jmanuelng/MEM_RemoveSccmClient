@@ -38,10 +38,10 @@ Function Test-IfServiceExistExit1 {
     }
     else {
 
-        $Result = 1
+        $Global:Result = 1
         Write-Warning "Service $ServiceName exists."
-        if ( -not ($DetectSummary -eq "")) { $DetectSummary += ", "}
-        $DetectSummary += "$ServiceName exists"
+        if ( -not ($Global:DetectSummary -eq "")) { $Global:DetectSummary += ", "}
+        $Global:DetectSummary += "$ServiceName service exists"
         
     }
 }
@@ -62,10 +62,10 @@ Function Test-IfRegKeyExistExit1 {
     }
     else {
 
-        $Result = 1
+        $Global:Result = 1
         Write-Warning "$RegKeyPath exists."
-        if ( -not ($DetectSummary -eq "")) { $DetectSummary += ", "}
-        $DetectSummary += "$RegKeyPath exists"
+        if ( -not ($Global:DetectSummary -eq "")) { $Global:DetectSummary += ", "}
+        $Global:DetectSummary += "$RegKeyPath exists"
 
     }
 }
