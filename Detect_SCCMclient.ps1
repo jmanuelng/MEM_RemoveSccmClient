@@ -2,7 +2,7 @@
 
 .Description
     Script to detect if there is any trace of SCCM agent.
-    Will check for CcmExec service and registry keys for services, SMS Certs and MDM Authority
+    Will check for CcmExec service and registry keys for services, SMS Certs and MDM Authority.
 
 .Notes
     Source: https://github.com/robertomoir/remove-sccm/blob/master/remove-sccmagent.ps1
