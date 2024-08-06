@@ -2,7 +2,7 @@
 
 .Description
     Script to detect if there is any trace of SCCM agent.
-    Will check for CcmExec service and registry keys for services, SMS Certs and MDM Authority.
+    Will check for CcmExec service and registry keys for services, SMS Certs, and MDM Authority.
 
 .Notes
     Source: https://github.com/robertomoir/remove-sccm/blob/master/remove-sccmagent.ps1
@@ -31,19 +31,20 @@ Function Test-IfServiceExistExit1 {
         [string]$ServiceName
     )
 
+    $DetectSummary = ""
+
     $Service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
 
     If ($null -eq $Service) {
         Write-Host "Service $ServiceName was not found."
     }
     else {
-
-        $Global:Result = 1
         Write-Warning "Service $ServiceName exists."
-        if ( -not ($Global:DetectSummary -eq "")) { $Global:DetectSummary += ", "}
-        $Global:DetectSummary += "$ServiceName service exists"
-        
+        if (-not ($DetectSummary -eq "")) { $DetectSummary += ", " }
+        $DetectSummary += "$ServiceName service exists"
+        return 1, $DetectSummary
     }
+    return 0, $DetectSummary
 }
 
 Function Test-IfRegKeyExistExit1 {
@@ -53,25 +54,23 @@ Function Test-IfRegKeyExistExit1 {
         [string]$RegKeyPath
     )
 
+    $DetectSummary = ""
+
     $RegKey = Get-Item -Path $RegKeyPath -ErrorAction SilentlyContinue
     
     if ($null -eq $RegKey) {
-
         Write-Host "Registry Key $RegKeyPath was not found."
-
     }
     else {
-
-        $Global:Result = 1
         Write-Warning "$RegKeyPath exists."
-        if ( -not ($Global:DetectSummary -eq "")) { $Global:DetectSummary += ", "}
-        $Global:DetectSummary += "$RegKeyPath exists"
-
+        if (-not ($DetectSummary -eq "")) { $DetectSummary += ", " }
+        $DetectSummary += "$RegKeyPath exists"
+        return 1, $DetectSummary
     }
+    return 0, $DetectSummary
 }
 
 #endregion Functions
-
 
 #region Main
 
@@ -79,10 +78,12 @@ Function Test-IfRegKeyExistExit1 {
 $Services = ("CcmExec", "CCMSetup", "smstsmgr", "CmRcService")
 
 foreach ($Serv in $Services) {
-
-    #Verify that services do no exist
-    Test-IfServiceExistExit1 $Serv
-
+    # Verify that services do not exist
+    $result, $serviceSummary = Test-IfServiceExistExit1 $Serv
+    if ($result -eq 1) {
+        $Result = 1
+    }
+    $DetectSummary += $serviceSummary
 }
 
 #Verify that all registry keys from SCCM agent do not exist.
@@ -107,22 +108,22 @@ $RegServices = (
     )
 
 foreach ($RegService in $RegServices) {
-
-    #Verify that Registry Keys do no exist
-    Test-IfRegKeyExistExit1 $RegService
-
+    # Verify that Registry Keys do not exist
+    $result, $regKeySummary = Test-IfRegKeyExistExit1 $RegService
+    if ($result -eq 1) {
+        $Result = 1
+    }
+    $DetectSummary += $regKeySummary
 }
 
 #New lines, easier to read Agentexecutor Log file.
 Write-Host "`n`n"
 
-#Return result
+# Return result
 if ($Result -eq 0) {
-
     Write-Host "OK $([datetime]::Now) : SCCM not found."
     Exit 0
-}
-else {
+} else {
     Write-Host "WARNING $([datetime]::Now) : $DetectSummary"
     Exit 1
 }
